@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: counter
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: counter
+  template:
+    metadata:
+      labels:
+        app: counter
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "counter"
+        dapr.io/app-port: "8080"
+    spec:
+      containers:
+        - name: counter
+          image: dapr-actor-example:v1
+          imagePullPolicy: Never
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: counter
+spec:
+  selector:
+    app: counter
+  ports:
+    - port: 8080
+
