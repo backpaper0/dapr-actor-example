@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: counter
-          image: dapr-actor-example:v1
+          image: dapr-actor-example:v2
           imagePullPolicy: Never
 ---
 apiVersion: v1
