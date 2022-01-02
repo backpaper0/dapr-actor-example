@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.dapr.actors.ActorId;
@@ -11,6 +12,7 @@ import io.dapr.actors.client.ActorClient;
 import io.dapr.actors.client.ActorProxyBuilder;
 
 @RestController
+@RequestMapping("/counter")
 public class CounterController {
 
 	private final ActorProxyBuilder<CounterActor> actorProxyBuilder;
