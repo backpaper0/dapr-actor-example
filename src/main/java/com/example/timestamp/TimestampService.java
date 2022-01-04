@@ -7,14 +7,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Component;
 
 import io.dapr.client.DaprClient;
 import io.dapr.client.domain.State;
 import io.dapr.utils.TypeRef;
 import reactor.core.publisher.Mono;
 
-@RestController
+@Component
 public class TimestampService {
 
 	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss");
