@@ -1,8 +1,6 @@
 package com.example.timestamp;
 
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -16,7 +14,6 @@ import reactor.core.publisher.Mono;
 @Component
 public class TimestampService {
 
-	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss");
 	private final TypeRef<List<String>> stateType = new TypeRef<>() {
 	};
 	private final String storeName = "statestore";
@@ -34,12 +31,12 @@ public class TimestampService {
 	}
 
 	public Mono<Void> addTimestamp() {
-		return daprClient.getState(storeName, key, stateType)
-				.mapNotNull(State::getValue)
-				.defaultIfEmpty(List.of())
+		return timestamps()
 				.flatMap(timestamps -> {
-					var timestamp = LocalDateTime.now(ZoneOffset.ofHours(9)).format(formatter);
-					var newTimestamps = Stream.concat(timestamps.stream(), Stream.of(timestamp)).toList();
+					var timestamp = LocalDateTime.now().toString();
+					var newTimestamps = Stream.concat(
+							timestamps.stream(),
+							Stream.of(timestamp)).toList();
 					return daprClient.saveState(storeName, key, newTimestamps);
 				});
 	}

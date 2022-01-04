@@ -29,7 +29,7 @@ public class TimestampActorImpl extends AbstractActor implements TimestampActor,
 	public Mono<Void> timer(int seconds) {
 		String callback = "handleTimer";
 		Duration dueTime = Duration.ofSeconds(seconds);
-		return registerActorTimer(null, callback, "", dueTime, Duration.ZERO).then();
+		return registerActorTimer(null, callback, "", dueTime, Duration.ofMillis(-1)).then();
 	}
 
 	@Override
@@ -40,7 +40,7 @@ public class TimestampActorImpl extends AbstractActor implements TimestampActor,
 	@Override
 	public Mono<Void> reminder(int seconds) {
 		Duration dueTime = Duration.ofSeconds(seconds);
-		return registerReminder(UUID.randomUUID().toString(), "", dueTime, Duration.ZERO);
+		return registerReminder(UUID.randomUUID().toString(), "", dueTime, Duration.ofMillis(-1));
 	}
 
 	@Override
