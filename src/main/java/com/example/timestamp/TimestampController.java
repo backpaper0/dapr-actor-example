@@ -27,13 +27,13 @@ public class TimestampController {
 	}
 
 	@GetMapping
-	public Mono<List<List<String>>> timestamps() {
+	public Mono<List<String>> timestamps() {
 		return timestamps.timestamps();
 	}
 
 	@PostMapping
 	public Mono<Void> addTimestamp() {
-		return timestamps.addTimestamp("controller");
+		return timestamps.addTimestamp();
 	}
 
 	@GetMapping("/{actorId}")

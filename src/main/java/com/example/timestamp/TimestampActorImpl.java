@@ -27,24 +27,20 @@ public class TimestampActorImpl extends AbstractActor implements TimestampActor,
 
 	@Override
 	public Mono<Void> timer(int seconds) {
-		String timerName = UUID.randomUUID().toString();
 		String callback = "handleTimer";
-		String state = "timer/" + timestamps.timestamp();
 		Duration dueTime = Duration.ofSeconds(seconds);
-		return registerActorTimer(timerName, callback, state, dueTime, Duration.ZERO).then();
+		return registerActorTimer(null, callback, "", dueTime, Duration.ZERO).then();
 	}
 
 	@Override
 	public Mono<Void> handleTimer(String state) {
-		return timestamps.addTimestamp(state);
+		return timestamps.addTimestamp();
 	}
 
 	@Override
 	public Mono<Void> reminder(int seconds) {
-		String reminderName = UUID.randomUUID().toString();
-		String state = "reminder/" + timestamps.timestamp();
 		Duration dueTime = Duration.ofSeconds(seconds);
-		return registerReminder(reminderName, state, dueTime, Duration.ZERO);
+		return registerReminder(UUID.randomUUID().toString(), "", dueTime, Duration.ZERO);
 	}
 
 	@Override
@@ -54,6 +50,6 @@ public class TimestampActorImpl extends AbstractActor implements TimestampActor,
 
 	@Override
 	public Mono<Void> receiveReminder(String reminderName, String state, Duration dueTime, Duration period) {
-		return timestamps.addTimestamp(state);
+		return timestamps.addTimestamp();
 	}
 }
