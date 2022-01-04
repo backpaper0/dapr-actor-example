@@ -2,7 +2,6 @@ package com.example.timestamp;
 
 import java.util.List;
 
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,7 +27,7 @@ public class TimestampController {
 	}
 
 	@GetMapping
-	public Mono<List<TimestampState>> timestamps() {
+	public Mono<List<List<String>>> timestamps() {
 		return timestamps.timestamps();
 	}
 
@@ -37,27 +36,21 @@ public class TimestampController {
 		return timestamps.addTimestamp("controller");
 	}
 
+	@GetMapping("/{actorId}")
+	public String hostname(@PathVariable ActorId actorId) {
+		TimestampActor timestampActor = actorProxyBuilder.build(actorId);
+		return timestampActor.hostname();
+	}
+
 	@PostMapping("/{actorId}/timer")
-	public Mono<String> addTimer(@PathVariable ActorId actorId, @RequestParam int seconds) {
+	public Mono<Void> timer(@PathVariable ActorId actorId, @RequestParam int seconds) {
 		TimestampActor timestampActor = actorProxyBuilder.build(actorId);
 		return timestampActor.timer(seconds);
 	}
 
 	@PostMapping("/{actorId}/reminder")
-	public Mono<String> addReminer(@PathVariable ActorId actorId, @RequestParam int seconds) {
+	public Mono<Void> reminder(@PathVariable ActorId actorId, @RequestParam int seconds) {
 		TimestampActor timestampActor = actorProxyBuilder.build(actorId);
 		return timestampActor.reminder(seconds);
-	}
-
-	@DeleteMapping("/{actorId}/timer")
-	public Mono<Void> removeTimer(@PathVariable ActorId actorId, @RequestParam String name) {
-		TimestampActor timestampActor = actorProxyBuilder.build(actorId);
-		return timestampActor.removeTimer(name);
-	}
-
-	@DeleteMapping("/{actorId}/reminder")
-	public Mono<Void> removeReminer(@PathVariable ActorId actorId, @RequestParam String name) {
-		TimestampActor timestampActor = actorProxyBuilder.build(actorId);
-		return timestampActor.removeReminder(name);
 	}
 }

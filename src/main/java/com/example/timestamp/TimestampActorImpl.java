@@ -10,7 +10,7 @@ import io.dapr.actors.runtime.Remindable;
 import io.dapr.utils.TypeRef;
 import reactor.core.publisher.Mono;
 
-public class TimestampActorImpl extends AbstractActor implements TimestampActor, Remindable<TimerReminderState> {
+public class TimestampActorImpl extends AbstractActor implements TimestampActor, Remindable<String> {
 
 	private final TimestampService timestamps;
 
@@ -21,46 +21,39 @@ public class TimestampActorImpl extends AbstractActor implements TimestampActor,
 	}
 
 	@Override
-	public Mono<String> timer(int seconds) {
+	public String hostname() {
+		return System.getenv("HOSTNAME");
+	}
+
+	@Override
+	public Mono<Void> timer(int seconds) {
 		String timerName = UUID.randomUUID().toString();
 		String callback = "handleTimer";
-		TimerReminderState state = new TimerReminderState("timer/" + timerName, timestamps.now());
+		String state = "timer/" + timestamps.timestamp();
 		Duration dueTime = Duration.ofSeconds(seconds);
-		return registerActorTimer(timerName, callback, state, dueTime, Duration.ZERO);
+		return registerActorTimer(timerName, callback, state, dueTime, Duration.ZERO).then();
 	}
 
 	@Override
-	public Mono<Void> removeTimer(String timerName) {
-		return unregisterTimer(timerName);
+	public Mono<Void> handleTimer(String state) {
+		return timestamps.addTimestamp(state);
 	}
 
 	@Override
-	public Mono<Void> handleTimer(TimerReminderState state) {
-		return timestamps.addTimestamp(state.source(), state.sourceTimestamp());
-	}
-
-	@Override
-	public Mono<String> reminder(int seconds) {
+	public Mono<Void> reminder(int seconds) {
 		String reminderName = UUID.randomUUID().toString();
-		TimerReminderState state = new TimerReminderState("reminder/" + reminderName, timestamps.now());
+		String state = "reminder/" + timestamps.timestamp();
 		Duration dueTime = Duration.ofSeconds(seconds);
-		return registerReminder(reminderName, state, dueTime, Duration.ZERO)
-				.thenReturn(reminderName);
+		return registerReminder(reminderName, state, dueTime, Duration.ZERO);
 	}
 
 	@Override
-	public Mono<Void> removeReminder(String reminderName) {
-		return unregisterReminder(reminderName);
+	public TypeRef<String> getStateType() {
+		return TypeRef.get(String.class);
 	}
 
 	@Override
-	public TypeRef<TimerReminderState> getStateType() {
-		return TypeRef.get(TimerReminderState.class);
-	}
-
-	@Override
-	public Mono<Void> receiveReminder(String reminderName, TimerReminderState state, Duration dueTime,
-			Duration period) {
-		return timestamps.addTimestamp(state.source(), state.sourceTimestamp());
+	public Mono<Void> receiveReminder(String reminderName, String state, Duration dueTime, Duration period) {
+		return timestamps.addTimestamp(state);
 	}
 }

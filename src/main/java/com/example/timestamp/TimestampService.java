@@ -2,10 +2,11 @@ package com.example.timestamp;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.dapr.client.DaprClient;
@@ -16,37 +17,41 @@ import reactor.core.publisher.Mono;
 @RestController
 public class TimestampService {
 
-	@Autowired
-	private DaprClient daprClient;
-
-	private final TypeRef<List<TimestampState>> stateType = new TypeRef<>() {
+	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss");
+	private final TypeRef<List<List<String>>> stateType = new TypeRef<>() {
 	};
 	private final String storeName = "statestore";
 	private final String key = "timestamps";
+	private final DaprClient daprClient;
+	private final String source;
 
-	public Mono<List<TimestampState>> timestamps() {
+	public TimestampService(DaprClient daprClient) {
+		this.daprClient = daprClient;
+		this.source = Objects.toString(System.getenv("HOSTNAME"), "<none>");
+	}
+
+	public Mono<List<List<String>>> timestamps() {
 		return daprClient.getState(storeName, key, stateType)
 				.mapNotNull(State::getValue)
 				.defaultIfEmpty(List.of());
 	}
 
 	public Mono<Void> addTimestamp(String source) {
-		return addTimestamp(source, now());
-	}
-
-	public Mono<Void> addTimestamp(String source, LocalDateTime sourceTimestamp) {
 		return daprClient.getState(storeName, key, stateType)
 				.mapNotNull(State::getValue)
 				.defaultIfEmpty(List.of())
 				.flatMap(timestamps -> {
-					List<TimestampState> newTimestamps = new ArrayList<>();
-					newTimestamps.addAll(timestamps);
-					newTimestamps.add(new TimestampState(now(), source, sourceTimestamp));
+					var newState = List.of(timestamp(), source);
+					var newTimestamps = Stream.concat(timestamps.stream(), Stream.of(newState)).toList();
 					return daprClient.saveState(storeName, key, newTimestamps);
 				});
 	}
 
-	public LocalDateTime now() {
-		return LocalDateTime.now(ZoneOffset.ofHours(9));
+	public String timestamp() {
+		return LocalDateTime.now(ZoneOffset.ofHours(9)).format(formatter);
+	}
+
+	public String source() {
+		return source;
 	}
 }

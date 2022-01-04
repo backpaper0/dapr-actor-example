@@ -1,24 +1,16 @@
 package com.example.timestamp;
 
-import io.dapr.actors.ActorMethod;
 import io.dapr.actors.ActorType;
 import reactor.core.publisher.Mono;
 
 @ActorType(name = "TimestampActor")
 public interface TimestampActor {
 
-	@ActorMethod(returns = String.class)
-	Mono<String> timer(int seconds);
+	String hostname();
 
-	@ActorMethod(returns = Void.class)
-	Mono<Void> handleTimer(TimerReminderState state);
+	Mono<Void> timer(int seconds);
 
-	@ActorMethod(returns = String.class)
-	Mono<String> reminder(int seconds);
+	Mono<Void> handleTimer(String source);
 
-	@ActorMethod(returns = Void.class)
-	Mono<Void> removeTimer(String timerName);
-
-	@ActorMethod(returns = Void.class)
-	Mono<Void> removeReminder(String reminderName);
+	Mono<Void> reminder(int seconds);
 }
